@@ -77,6 +77,31 @@ async def health_check():
     return {"status": "healthy"}
 
 
+def verify_query_token(token: str):
+    """Verify the token from query parameter."""
+    if token != API_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return token
+
+
+@app.get("/convert/url")
+async def convert_url_to_pdf_get(url: str, token: str):
+    """Convert a URL to PDF using query parameters.
+    
+    Example: /convert/url?url=https://example.com&token=your_token
+    """
+    verify_query_token(token)
+    try:
+        pdf_bytes = await generate_pdf_from_url(url)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=output.pdf"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to convert URL: {str(e)}")
+
+
 @app.post("/convert/url")
 async def convert_url_to_pdf(request: URLRequest, token: str = Depends(verify_token)):
     """Convert a URL to PDF."""
