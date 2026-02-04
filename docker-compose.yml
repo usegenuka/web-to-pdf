@@ -1,0 +1,8 @@
+services:
+  html-to-pdf:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - API_TOKEN=${API_TOKEN:-your-secret-token}
+    restart: unless-stopped
